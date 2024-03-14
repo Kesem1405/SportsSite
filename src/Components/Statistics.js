@@ -130,6 +130,7 @@ class Statistics extends React.Component {
                         <div className="statistics">
                             <div>First half goals = {this.state.firstHalfGoals}</div>
                             <div>Second half goals = {this.state.secondHalfGoals}</div>
+                            <div>Total goals = {this.state.firstHalfGoals + this.state.secondHalfGoals}</div>
                             <div>Earliest goal
                                 = {this.state.earliestGoal + "' Minute By " + this.state.earliestGoalScorer}</div>
                             <div>Latest goal

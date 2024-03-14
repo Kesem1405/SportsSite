@@ -54,7 +54,7 @@ class Squad extends Component {
         const { players, doneLoading } = this.state;
         return (
             <div>
-                <h2>Squad</h2>
+                <h2 className={"pageTitles"}>{this.state.clubName} Squad</h2>
                 <div>
                     <img className="squadLogo" src={ClubLogos[this.state.clubName]}
                          alt={`${this.state.clubName} logo`}/>
@@ -63,9 +63,9 @@ class Squad extends Component {
                     players.length > 0 ? (
                         <ul>
                         {players.map((player) => (
-                                <li key={player.id}>
-                                    {player.firstName} {player.lastName} - Captain: {player.captain ? 'Yes' : 'No'}
-                                </li>
+                                <div key={player.id} style={{fontWeight:"bold"}}>
+                                    {player.id+1}.{player.firstName} {player.lastName} - Captain: {player.captain ? 'Yes' : 'No'}
+                                </div>
                             ))}
                         </ul>
                     ) : (
