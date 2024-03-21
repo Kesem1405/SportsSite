@@ -13,15 +13,11 @@ import React from "react";
 function App() {
     return (
         <div className="App">
-            <div>
-
-                        <img className="logo" src={SportSite} alt="Logo"/>
-
-            </div>
 
             <BrowserRouter>
             <div>
                 <nav>
+                    <NavLink to="/"> <img className="logo" src={SportSite} alt="Logo"/></NavLink>
                     <NavLink to="/Tables" className={({isActive}) => isActive ? "activeLink" : "link"}>Tables</NavLink>
                     <NavLink to="/History"
                              className={({isActive}) => isActive ? "activeLink" : "link"}>History</NavLink>
@@ -32,6 +28,7 @@ function App() {
                 </nav>
             </div>
             <Routes>
+                <Route path="localhost:3000/" element={<App/>}/>
                 <Route path="/Tables" element={<Tables/>}/>
                 <Route path="/History" element={<History/>}/>
                 <Route path="/TopScorers" element={<TopScorers/>}/>

@@ -9,7 +9,7 @@ class History extends React.Component {
         leagues: [],
         matches: [],
         minRound: 1,
-        maxRound: 15,
+        maxRound: 38,
         visibleRounds: {}
     }
 
@@ -49,13 +49,13 @@ class History extends React.Component {
     };
 
     handleMinRoundChange = (e) => {
-        const minRound = Math.max(0, Math.min(15, e.target.value));
+        const minRound = Math.max(0, Math.min(38, e.target.value));
         this.setState({ minRound });
         this.fetchMatchesForRoundRange(this.state.leagueId, this.state.minRound, this.state.maxRound);
     };
 
     handleMaxRoundChange = (e) => {
-        const maxRound = Math.max(0, Math.min(15, e.target.value));
+        const maxRound = Math.max(0, Math.min(38, e.target.value));
         this.setState({ maxRound });
         this.fetchMatchesForRoundRange(this.state.leagueId, this.state.minRound, this.state.maxRound);
     };
@@ -137,7 +137,7 @@ class History extends React.Component {
                             value={minRound}
                             onChange={this.handleMinRoundChange}
                             min="0"
-                            max="15"
+                            max="38"
                         />
                             and
                         <input
@@ -145,7 +145,7 @@ class History extends React.Component {
                             value={maxRound}
                             onChange={this.handleMaxRoundChange}
                             min="0"
-                            max="15"
+                            max="38"
                         />
                         {leagueId !== "-1" && this.renderMatches()}
                     </div>
