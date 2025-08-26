@@ -43,21 +43,36 @@ class History extends React.Component {
     }
 
     handleLeagueChange = (leagueId) => {
-        this.setState({ leagueId });
-        this.fetchMatchesForRoundRange(this.state.leagueId, this.state.minRound, this.state.maxRound);
-        this.setState({visibleRounds: false})
+        this.setState({ leagueId, visibleRounds: {}, matches: [] }, () => {
+            this.fetchMatchesForRoundRange(
+                leagueId,                  // להשתמש בפרמטר החדש, לא ב-state
+                this.state.minRound,
+                this.state.maxRound
+            );
+        });
     };
 
     handleMinRoundChange = (e) => {
-        const minRound = Math.max(0, Math.min(38, e.target.value));
-        this.setState({ minRound });
-        this.fetchMatchesForRoundRange(this.state.leagueId, this.state.minRound, this.state.maxRound);
+        const minRound = Math.max(0, Math.min(38, Number(e.target.value)));
+        this.setState({ minRound }, () => {
+            this.fetchMatchesForRoundRange(
+                this.state.leagueId,
+                minRound,
+                this.state.maxRound
+            );
+        });
     };
 
+
     handleMaxRoundChange = (e) => {
-        const maxRound = Math.max(0, Math.min(38, e.target.value));
-        this.setState({ maxRound });
-        this.fetchMatchesForRoundRange(this.state.leagueId, this.state.minRound, this.state.maxRound);
+        const maxRound = Math.max(0, Math.min(38, Number(e.target.value)));
+        this.setState({ maxRound }, () => {
+            this.fetchMatchesForRoundRange(
+                this.state.leagueId,
+                this.state.minRound,
+                maxRound                   // הערך החדש
+            );
+        });
     };
 
     renderMatches = () => {
@@ -84,10 +99,10 @@ class History extends React.Component {
                                         <img className="clubLogo" src={ClubLogos[match.awayTeam.name]} alt={`${match.awayTeam.name} logo`} />
                                     </div>
                                     <div>
-                                        Home Scorers: {homeScorers.length > 0 ? homeScorers : "None"}
+                                        Home Scorers: {homeScorers.length > 0 ? homeScorers : "--"}
                                     </div>
                                     <div>
-                                        Away Scorers: {awayScorers.length > 0 ? awayScorers : "None"}
+                                        Away Scorers: {awayScorers.length > 0 ? awayScorers : "--"}
                                     </div>
                                 </div>
                             );

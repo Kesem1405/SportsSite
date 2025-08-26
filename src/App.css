@@ -102,7 +102,7 @@ th{
 }
 
 .last-places {
-    background-color: #860000;
+    background-color: #ff8d8d;
 }
 
 .container, .container img {
@@ -113,11 +113,14 @@ th{
     width: 40px;
     height: 40px;
     background: transparent none;
+    margin: 10px;
 }
 
 .matches {
-  margin-top: 30px;
-  padding-left: 20px;
+    padding-left: 20px;
+    display: grid;
+    grid-template-columns: repeat(5,2fr);
+    margin: 50px;
 }
 
 .match-details {

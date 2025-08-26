@@ -1,5 +1,4 @@
 import './App.css';
-import axios from 'axios';
 import {BrowserRouter, Link, NavLink, Route, Router, Routes} from 'react-router-dom'
 import TopScorers from "./Components/TopScorers";
 import Statistics from "./Components/Statistics";
