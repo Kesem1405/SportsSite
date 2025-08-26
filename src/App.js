@@ -15,7 +15,7 @@ function App() {
         <div className="App">
 
             <BrowserRouter>
-                <NavLink className="link" to="/"> <img className="logo" src={SportSite} alt="Logo"/></NavLink>
+                <NavLink className="logo-link" to="/"> <img className="logo" src={SportSite} alt="Logo"/></NavLink>
                 <div>
                 <nav className="top-nav">
                     <NavLink to="/Tables" className={({isActive}) => isActive ? "activeLink" : "link"}>Tables</NavLink>
