@@ -63,7 +63,6 @@ class Squad extends Component {
     renderMatches = () => {
         const { matches } = this.state;
         return matches.map((match, index) => {
-            // Counting goals for home and away teams
             let homeGoals = 0;
             let awayGoals = 0;
             match.goals.forEach(goal => {
@@ -75,14 +74,19 @@ class Squad extends Component {
             });
 
             return (
-                <div key={index}>
-                    <div style={{fontWeight:"bold", marginBottom: "15px"}}>
-                    <img className="clubLogo" src={ClubLogos[match.homeTeam.name]} alt={`${match.homeTeam.name} logo`}/>
-                    {match.homeTeam.name} {match.goals.filter(goal => goal.home).length} -
-                    {match.goals.filter(goal => !goal.home).length} {match.awayTeam.name}
-                    <img className="clubLogo" src={ClubLogos[match.awayTeam.name]} alt={`${match.awayTeam.name} logo`}/>
+                <div className="match-details">
+                    <div className="home-team">
+                        <img className="clubLogo" src={ClubLogos[match.homeTeam.name]} alt={`${match.homeTeam.name} logo`} />
+                        <span>{match.homeTeam.name}</span>
+                    </div>
+                    <div className="score">
+                        {match.goals.filter(g=>g.home).length} - {match.goals.filter(g=>!g.home).length}
+                    </div>
+                    <div className="away-team">
+                        <img className="clubLogo" src={ClubLogos[match.awayTeam.name]} alt={`${match.awayTeam.name} logo`} />
+                        <span>{match.awayTeam.name}</span>
+                    </div>
                 </div>
-        </div>
         )
             ;
         });
@@ -100,11 +104,11 @@ class Squad extends Component {
                 {doneLoading ? (
                     <>
                         {players.length > 0 ? (
-                            <ul>
+                            <ul className="squad-display">
                                 {players.map((player, index) => (
                                     <li key={player.id} style={{fontWeight: "bold"}}>
-                                        {index + 1}.{player.firstName} {player.lastName} -
-                                        Captain: {player.captain ? 'Yes' : 'No'}
+                                        {index + 1}.{player.firstName} {player.lastName}
+                                      {player.captain ? 'Captain' : ''}
                                     </li>
                                 ))}
                             </ul>

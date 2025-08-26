@@ -1,48 +1,49 @@
 import React from "react";
-
 import axios from "axios";
 
 class Statistics extends React.Component {
     state = {
         selectedLeagueId: 0,
         leagues: [],
-        firstHalfGoals: [],
-        secondHalfGoals: [],
-        earliestGoal: 999,
+        firstHalfGoals: 0,
+        secondHalfGoals: 0,
+        earliestGoal: 'N/A',
         earliestGoalScorer: "",
-        latestGoal: '0',
+        latestGoal: 'N/A',
         latestGoalScorer: "",
-        highestRound: 0,
+        highestRound: 'N/A',
         highestRoundGoals: 0,
-        lowestRound: 0,
-        lowestRoundGoals: 0,
-        doneLoading: false
-    }
+        lowestRound: 'N/A',
+        lowestRoundGoals: 'N/A',
+        doneLoading: false,
+    };
 
     componentDidMount() {
-        axios.get("https://app.seker.live/fm1/leagues")
-            .then(response => {
-                if (response.data && Array.isArray(response.data)) {
-                    this.setState({leagues: response.data});
+        axios
+            .get("https://app.seker.live/fm1/leagues")
+            .then((response) => {
+                if (Array.isArray(response.data)) {
+                    this.setState({ leagues: response.data, doneLoading: true });
                 } else {
                     console.log("Unexpected response structure:", response.data);
                 }
             })
-            .catch(error => console.error("Fetching leagues failed: ", error));
+            .catch((error) => console.error("Fetching leagues failed: ", error));
     }
 
     fetchLeagueStatistics = (leagueId) => {
-        axios.get(`https://app.seker.live/fm1/history/${leagueId}`)
-            .then(response => {
-                if (response.data && Array.isArray(response.data)) {
-                    const stats = this.calculateMatchStats(response.data);
-                    this.setState({selectedLeagueId: leagueId})
+        axios
+            .get(`https://app.seker.live/fm1/history/${leagueId}`)
+            .then((response) => {
+                if (Array.isArray(response.data)) {
+                    this.calculateMatchStats(response.data);
+                    this.setState({ selectedLeagueId: leagueId });
                 } else {
                     console.log("Unexpected response structure:", response.data);
                 }
             })
-            .catch(error => console.error(`Fetching top scorers for league ${leagueId} failed: `, error));
-    }
+            .catch((error) => console.error(`Fetching stats for league ${leagueId} failed: `, error));
+    };
 
     calculateMatchStats = (matches) => {
         let earliestGoalMinute = 999;
@@ -51,49 +52,39 @@ class Statistics extends React.Component {
         let latestScorerName = "";
         let fhGoals = 0;
         let shGoals = 0;
-        let roundGoals = {};
+        const roundGoals = {};
 
-        matches.forEach(match => {
+        matches.forEach((match) => {
             const round = match.round;
-            if (!roundGoals[round]) {
-                roundGoals[round] = 0; // Initialize this round in the tracker if not already present
-            }
+            roundGoals[round] = roundGoals[round] || 0;
 
-            match.goals.forEach(goal => {
-                const goalMinute = parseInt(goal.minute);
-                if (goalMinute <= 45) {
-                    fhGoals += 1;
-                } else {
-                    shGoals += 1;
-                }
+            match.goals.forEach((goal) => {
+                const minute = parseInt(goal.minute);
+                if (minute <= 45) fhGoals += 1;
+                else shGoals += 1;
+
                 roundGoals[round] += 1;
 
-                if (goalMinute < earliestGoalMinute) {
-                    earliestGoalMinute = goalMinute;
-                    earliestGoalScorer = goal.scorer.firstName + " " + goal.scorer.lastName;
+                if (minute < earliestGoalMinute) {
+                    earliestGoalMinute = minute;
+                    earliestGoalScorer = `${goal.scorer.firstName} ${goal.scorer.lastName}`;
                 }
-                if (goalMinute > latestGoalMinute) {
-                    latestGoalMinute = goalMinute;
-                    latestScorerName = goal.scorer.firstName + " " + goal.scorer.lastName;
+                if (minute > latestGoalMinute) {
+                    latestGoalMinute = minute;
+                    latestScorerName = `${goal.scorer.firstName} ${goal.scorer.lastName}`;
                 }
             });
         });
 
         let highestRoundGoals = 0;
-        let lowestRoundGoals = 999;
-        let highestRound = -1;
-        let lowestRound = -1;
+        let lowestRoundGoals = Infinity;
+        let highestRound = 'N/A';
+        let lowestRound = 'N/A';
 
-        Object.keys(roundGoals).forEach(round => {
-            const goals = roundGoals[round];
-            if (goals > highestRoundGoals) {
-                highestRoundGoals = goals;
-                highestRound = round;
-            }
-            if (goals < lowestRoundGoals) {
-                lowestRoundGoals = goals;
-                lowestRound = round;
-            }
+        Object.keys(roundGoals).forEach((r) => {
+            const g = roundGoals[r];
+            if (g > highestRoundGoals) { highestRoundGoals = g; highestRound = r; }
+            if (g < lowestRoundGoals) { lowestRoundGoals = g; lowestRound = r; }
         });
 
         this.setState({
@@ -103,45 +94,89 @@ class Statistics extends React.Component {
             earliestGoalScorer: earliestGoalScorer || 'N/A',
             latestGoal: latestGoalMinute === 0 ? 'N/A' : latestGoalMinute,
             latestGoalScorer: latestScorerName || 'N/A',
-            highestRoundGoals: highestRoundGoals,
-            lowestRoundGoals: lowestRoundGoals === 999 ? 'N/A' : lowestRoundGoals,
-            highestRound: highestRound === -1 ? 'N/A' : highestRound,
-            lowestRound: lowestRound === -1 ? 'N/A' : lowestRound,
-            doneLoading: true
+            highestRound,
+            highestRoundGoals,
+            lowestRound,
+            lowestRoundGoals: lowestRoundGoals === Infinity ? 'N/A' : lowestRoundGoals,
+            doneLoading: true,
         });
-    }
-
+    };
 
     render() {
+        const { doneLoading, leagues, selectedLeagueId } = this.state;
+
         return (
-            <div>
-                <div className={"pageTitles"}> League statistics</div>
-                <div>
-                    {this.state.leagues.map((league) => (
-                        <button
-                            key={league.id} // Make sure 'id' is the correct key field
-                            onClick={() => this.fetchLeagueStatistics(league.id)}
-                            className={`button ${this.state.selectedLeagueId === league.id ? "active-league" : "league"}`}
-                        >
-                            {league.name}
-                        </button>
-                    ))}
-                    {this.state.earliestGoal !== 999 && (
-                        <div className="statistics">
-                            <div>First half goals = {this.state.firstHalfGoals}</div>
-                            <div>Second half goals = {this.state.secondHalfGoals}</div>
-                            <div>Total goals = {this.state.firstHalfGoals + this.state.secondHalfGoals}</div>
-                            <div>Earliest goal
-                                = {this.state.earliestGoal + "' Minute By " + this.state.earliestGoalScorer}</div>
-                            <div>Latest goal
-                                = {this.state.latestGoal + "' Minute By " + this.state.latestGoalScorer}</div>
-                            <div>Highest round goals
-                                = {this.state.highestRoundGoals + " In round: " + this.state.highestRound}</div>
-                            <div>Lowest round goals
-                                = {this.state.lowestRoundGoals + " In round: " + this.state.lowestRound}</div>
-                        </div>
-                    )}
-                </div>
+            <div className="container">
+                <div className="pageTitles pageTitles--bright">League Statistics</div>
+
+                {doneLoading ? (
+                    <>
+                        <nav className="top-nav">
+                            {leagues.map((league) => (
+                                <button
+                                    key={league.id}
+                                    onClick={() => this.fetchLeagueStatistics(league.id)}
+                                    className={selectedLeagueId === league.id ? "active-league" : "league"}
+                                >
+                                    {league.name === "English"
+                                        ? "Premier League"
+                                        : league.name === "Italian"
+                                            ? "Serie A"
+                                            : league.name === "Spanish"
+                                                ? "La Liga"
+                                                : league.name}
+                                </button>
+                            ))}
+                        </nav>
+
+                        {this.state.earliestGoal !== 'N/A' || this.state.latestGoal !== 'N/A' ? (
+                            <div className="cards-grid stats-cards">
+                                <div className="card stat-card">
+                                    <div className="stat-title">First Half Goals</div>
+                                    <div className="stat-value">{this.state.firstHalfGoals}</div>
+                                </div>
+                                <div className="card stat-card">
+                                    <div className="stat-title">Second Half Goals</div>
+                                    <div className="stat-value">{this.state.secondHalfGoals}</div>
+                                </div>
+                                <div className="card stat-card">
+                                    <div className="stat-title">Total Goals</div>
+                                    <div className="stat-value">{this.state.firstHalfGoals + this.state.secondHalfGoals}</div>
+                                </div>
+                                <div className="card stat-card">
+                                    <div className="stat-title">Earliest Goal</div>
+                                    <div className="stat-value">
+                                        {this.state.earliestGoal}' <span className="stat-sub">by {this.state.earliestGoalScorer}</span>
+                                    </div>
+                                </div>
+                                <div className="card stat-card">
+                                    <div className="stat-title">Latest Goal</div>
+                                    <div className="stat-value">
+                                        {this.state.latestGoal}' <span className="stat-sub">by {this.state.latestGoalScorer}</span>
+                                    </div>
+                                </div>
+                                <div className="card stat-card">
+                                    <div className="stat-title">Highest Round Goals</div>
+                                    <div className="stat-value">
+                                        {this.state.highestRoundGoals} <span className="stat-sub">in Round {this.state.highestRound}</span>
+                                    </div>
+                                </div>
+                                <div className="card stat-card">
+                                    <div className="stat-title">Lowest Round Goals</div>
+                                    <div className="stat-value">
+                                        {this.state.lowestRoundGoals} <span className="stat-sub">in Round {this.state.lowestRound}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div style={{ opacity: 0.7, textAlign: "center", marginTop: 12 }}>
+                                Choose a league to view statistics.
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <div>Loading leagues...</div>
+                )}
             </div>
         );
     }

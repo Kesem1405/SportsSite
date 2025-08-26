@@ -8,15 +8,16 @@ import SquadWraper from "./Components/SquadWraper";
 import SportSite from './SportSite.png';
 
 import React from "react";
+import Home from "./Components/Home";
 
 function App() {
     return (
         <div className="App">
 
             <BrowserRouter>
-            <div>
-                <nav>
-                    <NavLink to="/"> <img className="logo" src={SportSite} alt="Logo"/></NavLink>
+                <NavLink className="link" to="/"> <img className="logo" src={SportSite} alt="Logo"/></NavLink>
+                <div>
+                <nav className="top-nav">
                     <NavLink to="/Tables" className={({isActive}) => isActive ? "activeLink" : "link"}>Tables</NavLink>
                     <NavLink to="/History"
                              className={({isActive}) => isActive ? "activeLink" : "link"}>History</NavLink>
@@ -27,7 +28,7 @@ function App() {
                 </nav>
             </div>
             <Routes>
-                <Route path="localhost:3000/" element={<App/>}/>
+                <Route path="/" element={<Home/>}/>
                 <Route path="/Tables" element={<Tables/>}/>
                 <Route path="/History" element={<History/>}/>
                 <Route path="/TopScorers" element={<TopScorers/>}/>

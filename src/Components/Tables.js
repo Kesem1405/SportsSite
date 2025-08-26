@@ -1,9 +1,7 @@
 import React from "react";
-import axios from 'axios';
-import ClubLogos from './ClubLogos';
-import {NavLink, Route, Router, Routes} from 'react-router-dom';
-import Squad from "./Squad";
-
+import axios from "axios";
+import ClubLogos from "./ClubLogos";
+import { NavLink } from "react-router-dom";
 
 class Tables extends React.Component {
     state = {
@@ -11,51 +9,43 @@ class Tables extends React.Component {
         leagues: [],
         selectedLeagueId: null,
         leagueTable: [],
-        clubId:[]
-    }
-    static leagueChange;
+    };
 
     componentDidMount() {
-        axios.get("https://app.seker.live/fm1/leagues")
-            .then(response => {
-                if (response.data && Array.isArray(response.data)) {
-                    const leagues = response.data.map(league => ({
+        axios
+            .get("https://app.seker.live/fm1/leagues")
+            .then((response) => {
+                if (Array.isArray(response.data)) {
+                    const leagues = response.data.map((league) => ({
                         leagueId: league.id,
-                        leagueName: league.name
+                        leagueName: league.name,
                     }));
-                    this.setState({
-                        leagues,
-                        doneLoading: true
-                    });
+                    this.setState({ leagues, doneLoading: true });
                 } else {
                     console.log("Unexpected response structure:", response.data);
                 }
             })
-            .catch(error => console.error("Fetching leagues failed: ", error));
+            .catch((error) => console.error("Fetching leagues failed: ", error));
     }
 
-    leagueChange = (event) => {
-        const selectedLeagueId = event.target.value;
-        this.setState({
-            selectedLeagueId
-        });
-        if (selectedLeagueId !== "-1") {
-            axios.get(`https://app.seker.live/fm1/history/${selectedLeagueId}`)
-                .then(response => {
+    leagueChange = (eventOrId) => {
+        const selectedLeagueId = typeof eventOrId === "object" ? eventOrId.target.value : eventOrId;
+        this.setState({ selectedLeagueId, leagueTable: [] });
+        if (selectedLeagueId && selectedLeagueId !== "-1") {
+            axios
+                .get(`https://app.seker.live/fm1/history/${selectedLeagueId}`)
+                .then((response) => {
                     const leagueTable = this.calculateLeagueTable(response.data);
                     this.setState({ leagueTable });
                 })
-                .catch(error => console.error("Fetching matches failed: ", error));
-        } else {
-            this.setState({ leagueTable: [] });
-
+                .catch((error) => console.error("Fetching matches failed: ", error));
         }
-    }
+    };
 
     calculateLeagueTable = (matches) => {
         const teams = {};
-        matches.forEach(match => {
-            [match.homeTeam, match.awayTeam].forEach(team => {
+        matches.forEach((match) => {
+            [match.homeTeam, match.awayTeam].forEach((team) => {
                 if (!teams[team.id]) {
                     teams[team.id] = {
                         id: team.id,
@@ -67,15 +57,14 @@ class Tables extends React.Component {
                         wins: 0,
                         draws: 0,
                         losses: 0,
-
                     };
                 }
             });
 
             const homeTeam = teams[match.homeTeam.id];
             const awayTeam = teams[match.awayTeam.id];
-            const homeGoals = match.goals.filter(goal => goal.home).length;
-            const awayGoals = match.goals.filter(goal => !goal.home).length;
+            const homeGoals = match.goals.filter((g) => g.home).length;
+            const awayGoals = match.goals.filter((g) => !g.home).length;
 
             homeTeam.goalsFor += homeGoals;
             homeTeam.goalsAgainst += awayGoals;
@@ -97,33 +86,43 @@ class Tables extends React.Component {
                 awayTeam.draws += 1;
             }
         });
-        Object.values(teams).forEach(team => team.goalDifference = team.goalsFor - team.goalsAgainst);
-        return Object.values(teams).sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference);
-    }
+
+        Object.values(teams).forEach((t) => (t.goalDifference = t.goalsFor - t.goalsAgainst));
+
+        return Object.values(teams).sort(
+            (a, b) => b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor
+        );
+    };
 
     render() {
+        const { doneLoading, leagues, selectedLeagueId, leagueTable } = this.state;
+
         return (
-            <div>
-                {this.state.doneLoading ? (
-                    <div>
-                        <div className={"pageTitles"}>League Table:</div>
-                        <div>
-                            {this.state.leagues.map((league) => (
+            <div className="container">
+                <div className="pageTitles pageTitles--bright">League Table</div>
+
+                {doneLoading ? (
+                    <>
+                        <nav className="top-nav">
+                            {leagues.map((league) => (
                                 <button
                                     key={league.leagueId}
-                                    onClick={() => this.leagueChange({ target: { value: league.leagueId }})}
-                                    className={this.state.selectedLeagueId=== league.leagueId ? "active-league" : "league"}>
-                                    {league.leagueName === "English" ? "Premier League" :
-                                        league.leagueName === "Italian" ? "Serie A" :
-                                            league.leagueName === "Spanish" ? "La Liga" :
-                                                league.name}
+                                    onClick={() => this.leagueChange(league.leagueId)}
+                                    className={selectedLeagueId === league.leagueId ? "active-league" : "league"}
+                                >
+                                    {league.leagueName === "English"
+                                        ? "Premier League"
+                                        : league.leagueName === "Italian"
+                                            ? "Serie A"
+                                            : league.leagueName === "Spanish"
+                                                ? "La Liga"
+                                                : league.leagueName}
                                 </button>
                             ))}
-                        </div>
-                        <div>
-                        </div>
-                        <div className={"table"}>
-                            {this.state.leagueTable.length > 0 && (
+                        </nav>
+
+                        {leagueTable.length > 0 ? (
+                            <div className="table">
                                 <table>
                                     <thead>
                                     <tr>
@@ -136,41 +135,41 @@ class Tables extends React.Component {
                                         <th>L</th>
                                         <th>Scored</th>
                                         <th>Conceded</th>
-                                        <th>Goal Difference</th>
-                                        <th>Points</th>
+                                        <th>GD</th>
+                                        <th>Pts</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {this.state.leagueTable.map((team, index) => (
-                                        <tr key={index}
+                                    {leagueTable.map((team, index) => (
+                                        <tr
+                                            key={team.id}
                                             className={
                                                 index === 0
                                                     ? "first-place"
-                                                    : index >= this.state.leagueTable.length - 3
+                                                    : index >= leagueTable.length - 3
                                                         ? "last-places"
                                                         : ""
-                                            }>
-                                            <td>{index + 1}</td>
-                                            <td>
-                                                <img className="clubLogo" src={ClubLogos[team.name]}
-                                                     alt={`${team.name} logo`}/>
+                                            }
+                                        >
+                                            <td className="pos">
+                                                <span className="badge">{index + 1}</span>
                                             </td>
-
-                                           <td>
-                                               <NavLink
-                                                   to={{
-                                                       pathname: `/squad/${this.state.selectedLeagueId}/${team.id}`,
-                                                       state: { clubName: team.name }
-                                                   }}
-                                                   style={{fontWeight: "bold"}}
-                                               >
-                                                   {team.name}
-                                               </NavLink>
-                                           </td>
+                                            <td>
+                                                <img className="clubLogo" src={ClubLogos[team.name]} alt={`${team.name} logo`} />
+                                            </td>
+                                            <td>
+                                                <NavLink
+                                                    to={`/squad/${selectedLeagueId}/${team.id}`}
+                                                    state={{ clubName: team.name }}
+                                                    style={{ fontWeight: "bold", color: "inherit", textDecoration: "none" }}
+                                                >
+                                                    {team.name}
+                                                </NavLink>
+                                            </td>
                                             <td>{team.wins + team.losses + team.draws}</td>
-                                            <td><span style={{color: "#aeff95", fontWeight:"bolder"}}>{team.wins}</span></td>
-                                            <td><span style={{color: "#ffc400"}}>{team.draws}</span></td>
-                                            <td><span style={{color: "#d02900"}}>{team.losses}</span></td>
+                                            <td><span style={{ color: "#aeff95", fontWeight: "bolder" }}>{team.wins}</span></td>
+                                            <td><span style={{ color: "#ffc400" }}>{team.draws}</span></td>
+                                            <td><span style={{ color: "#d02900" }}>{team.losses}</span></td>
                                             <td>{team.goalsFor}</td>
                                             <td>{team.goalsAgainst}</td>
                                             <td>{team.goalDifference}</td>
@@ -179,16 +178,19 @@ class Tables extends React.Component {
                                     ))}
                                     </tbody>
                                 </table>
-                            )}
-                        </div>
-                    </div>
+                            </div>
+                        ) : (
+                            <div style={{ opacity: 0.7, textAlign: "center", marginTop: 12 }}>
+                                Choose a league to see the table.
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <div>Loading leagues...</div>
                 )}
             </div>
         );
     }
-
 }
 
 export default Tables;
