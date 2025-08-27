@@ -419,6 +419,7 @@ td.pos .badge{
     border-radius: var(--radius-lg);
     padding: 16px;
     box-shadow: var(--shadow);
+    overflow: hidden;
 }
 
 /* Top Scorers */
@@ -486,20 +487,50 @@ td.pos .badge{
     gap: var(--gap-4);
     margin-top: 18px;
 }
-.card-title{ font-weight:800; color: var(--ink-0); margin-bottom: 10px }
+
+/* Let names wrap naturally on home cards (no mid-word breaks) */
+.home-grid .mini-list .name,
+.home-grid .team .name{
+    white-space: normal;
+    word-break: normal;            /* avoid splitting inside words */
+    overflow-wrap: anywhere;       /* but still break if a single word is too long */
+    overflow: hidden;              /* keep text inside its cell */
+    text-overflow: clip;
+    display: block;
+    line-height: 1.2;
+}
+
+.card-title{ font-weight:800; color: var(--ink-0); margin-bottom: 10px; font-size:15px; }
 
 /* Latest matches (compact) */
 .mini-matches{ display:flex; flex-direction:column; gap:8px }
 .mini-match{
     display:grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); /* <-- was 160px */
     align-items:center;
     gap:10px;
     padding:10px 12px;
     border:1px solid var(--border);
     border-radius:12px;
     background:#ffffff08;
+    overflow: hidden;              /* extra safety */
 }
+
+/* Top-of-table / scorers list rows */
+.mini-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px }
+.mini-list li{
+    display:grid;
+    grid-template-columns: auto auto minmax(0,1fr) auto;     /* <-- allow the name column to shrink */
+    align-items:flex-start;
+    gap:10px;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:#ffffff08;
+    overflow: hidden;              /* extra safety */
+}
+
+/* Generic truncation elsewhere (overridden on home cards above) */
 .team{ display:flex; align-items:center; gap:8px; min-width:0 }
 .team.right{ justify-content:flex-end }
 .team .name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
@@ -510,13 +541,6 @@ td.pos .badge{
     border:1px solid #2a3a4f; color: var(--accent);
 }
 
-/* Lists (table top, scorers) */
-.mini-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px }
-.mini-list li{
-    display:grid; grid-template-columns: auto auto 1fr auto; align-items:center; gap:10px;
-    padding:10px 12px; border:1px solid var(--border); border-radius:12px; background:#ffffff08;
-}
-.mini-list .name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
 .pos-badge{
     width:26px; height:26px; line-height:26px; text-align:center; border-radius:50%;
     background:#203145; border:1px solid #3a4e69; font-weight:900; color:#e8eef6;
@@ -533,6 +557,14 @@ td.pos .badge{
 .quick-stats .muted{ color:var(--ink-1); font-weight:600 }
 .empty-note{ opacity:.7 }
 
+
+.disclaimer{
+    text-align:center;
+    color: var(--ink-1);
+    font-size: 13px;
+    opacity: .85;
+    margin: 8px auto 24px;
+}
 /* =========================
    SQUAD PAGE
    ========================= */
@@ -661,6 +693,10 @@ td.pos .badge{
     table{ width:96% }
     .statistics{ margin-top:4vh }
     .logo{ height:64px; width:64px }
+}
+@media (max-width: 560px){
+    .mini-match{ grid-template-columns: minmax(120px,1fr) auto minmax(120px,1fr) }
+    .mini-list li{ grid-template-columns: auto auto minmax(120px,1fr) auto }
 }
 @media (max-width: 420px){
     .pageTitles{ font-size: clamp(34px, 10vw, 56px) }

@@ -100,7 +100,7 @@ class TopScorers extends React.Component {
                                         <div className="scorer-main">
                                             <div className="scorer-name" title={s.name}>{s.name}</div>
                                             <div className="scorer-sub">
-                                                <span className="pill">{s.goals} goals</span>
+                                                <span className="pill">{s.goals} goals ⚽</span>
                                             </div>
                                         </div>
 

@@ -236,6 +236,11 @@ class Home extends React.Component {
                         ) : <div className="empty-note">Choose a league to see stats.</div>}
                     </div>
                 </section>
+
+                <p className="disclaimer">
+                    All clubs, players and results here are part of a simulation — none of the players are real.
+                </p>
+
             </div>
         );
     }
